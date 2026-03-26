@@ -34,7 +34,7 @@ export default function Hero() {
 
       {/* CTAs */}
       <div className="animate-hero-4 flex gap-3 flex-wrap justify-center">
-        <a href="#" className="btn-dark text-base px-8 py-4">
+       <a href="/build" className="btn-dark text-base px-8 py-4">
           Start Building — Free →
         </a>
         <a href="#templates" className="btn-light text-base px-8 py-4">
