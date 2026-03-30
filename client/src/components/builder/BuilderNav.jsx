@@ -15,7 +15,7 @@ export default function BuilderNav() {
         ← Back
       </button>
 
-      {step < 8 && (
+      {step < 9 && (
         <button
           onClick={goNext}
           className="bg-[#141413] text-white border-none px-6 py-2.5 rounded-xl font-bold text-[0.82rem] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)]"

@@ -62,7 +62,9 @@ export function BuilderProvider({ children }) {
 
   const [data, setData] = useState({
     name: "", title: "", tagline: "", email: "", phone: "", location: "",
-    photo: null, about: "", skills: [],
+    photo: null, coverImage: null, about: "",
+    // Skills now have proficiency
+    skills: [],
     projects: [{ name: "", description: "", link: "", image: null, tags: [] }],
     socials: [
       { icon: "🐙", label: "GitHub", url: "" }, { icon: "💼", label: "LinkedIn", url: "" },
@@ -73,6 +75,8 @@ export function BuilderProvider({ children }) {
     education: [{ degree: "", school: "", year: "" }],
     testimonials: [{ text: "", author: "", role: "" }],
     resume: null, resumeName: "",
+    // Contact info for Hire Me
+    contactMessage: "",
   });
 
   const [config, setConfig] = useState({
@@ -80,6 +84,29 @@ export function BuilderProvider({ children }) {
     layout: "classic", intro: "fade", avatarShape: "rounded", spacing: 1.2,
     effects: { grain: true, glow: true, animate: true, glass: false },
     sections: ["about", "skills", "projects"],
+    // ═══ NEW FEATURE TOGGLES ═══
+    features: {
+      skillBars: true,        // Animated proficiency bars
+      coverImage: false,       // Hero banner
+      availableBadge: true,    // Green "Available" dot
+      themeToggle: true,       // Dark/light switch for visitors
+      hireMeButton: true,      // Floating hire me button
+      flipCards: true,         // Project cards flip on hover
+      animatedIntro: true,     // Name animation on load
+      downloadResume: true,    // Resume download button
+    },
+    intro_config: {
+      template: "minimal",
+      welcomeText: "",
+      tagline: "",
+      showName: true,
+      showTitle: true,
+      showPhoto: false,
+      bgAnimation: "gradient",
+      duration: 3,
+      scrollArrow: true,
+      typingTagline: true,
+    },
   });
 
   // ═══ DATA HELPERS ═══
@@ -90,9 +117,16 @@ export function BuilderProvider({ children }) {
   const addProject = () => data.projects.length < 6 && setData(d => ({ ...d, projects: [...d.projects, { name: "", description: "", link: "", image: null, tags: [] }] }));
   const removeProject = (i) => data.projects.length > 1 && setData(d => ({ ...d, projects: d.projects.filter((_, idx) => idx !== i) }));
 
-  // Skills
-  const addSkill = (s) => s.trim() && data.skills.length < 20 && !data.skills.includes(s.trim()) && setData(d => ({ ...d, skills: [...d.skills, s.trim()] }));
+  // Skills with proficiency
+  const addSkill = (name, proficiency = 80) => {
+    if (name.trim() && data.skills.length < 20 && !data.skills.find(s => s.name === name.trim())) {
+      setData(d => ({ ...d, skills: [...d.skills, { name: name.trim(), proficiency }] }));
+    }
+  };
   const removeSkill = (i) => setData(d => ({ ...d, skills: d.skills.filter((_, idx) => idx !== i) }));
+  const updateSkillProficiency = (i, proficiency) => {
+    setData(d => ({ ...d, skills: d.skills.map((s, idx) => idx === i ? { ...s, proficiency } : s) }));
+  };
 
   // Socials
   const updateSocial = (index, url) => {
@@ -127,9 +161,10 @@ export function BuilderProvider({ children }) {
   const updateConfig = (k, v) => setConfig(c => ({ ...c, [k]: v }));
   const toggleEffect = (k) => setConfig(c => ({ ...c, effects: { ...c.effects, [k]: !c.effects[k] } }));
   const toggleSection = (id) => setConfig(c => ({ ...c, sections: c.sections.includes(id) ? c.sections.filter(s => s !== id) : [...c.sections, id] }));
+  const toggleFeature = (k) => setConfig(c => ({ ...c, features: { ...c.features, [k]: !c.features[k] } }));
 
   // ═══ NAVIGATION ═══
-  const goNext = () => setStep(s => Math.min(8, s + 1));
+  const goNext = () => setStep(s => Math.min(9, s + 1));
   const goBack = () => setStep(s => Math.max(1, s - 1));
   const goTo = (s) => setStep(s);
 
@@ -146,13 +181,13 @@ export function BuilderProvider({ children }) {
       step, setStep, goNext, goBack, goTo,
       data, setData, updateData,
       updateProject, addProject, removeProject,
-      addSkill, removeSkill,
+      addSkill, removeSkill, updateSkillProficiency,
       updateSocial,
       updateExperience, addExperience,
       updateEducation, addEducation,
       updateTestimonial, addTestimonial,
       config, setConfig, updateConfig,
-      toggleEffect, toggleSection,
+      toggleEffect, toggleSection, toggleFeature,
       completeness,
     }}>
       {children}

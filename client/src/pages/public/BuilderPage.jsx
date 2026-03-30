@@ -7,10 +7,11 @@ import StepAbout from "../../components/builder/StepAbout";
 import StepSkills from "../../components/builder/StepSkills";
 import StepProjects from "../../components/builder/StepProjects";
 import StepExtras from "../../components/builder/StepExtras";
-import StepDesign from "../../components/builder/StepDesign";
-import StepLaunch from "../../components/builder/StepLaunch";
+// import StepDesign from "../../components/builder/StepDesign";
+// import StepLaunch from "../../components/builder/StepLaunch";
 import BuilderPreview from "../../components/builder/BuilderPreview";
 import BuilderNav from "../../components/builder/BuilderNav";
+import StepIntro from "../../components/builder/StepIntro";
 
 function BuilderContent() {
   const { step } = useBuilder();
@@ -36,13 +37,14 @@ function BuilderContent() {
         <div className="flex-1 min-w-0 max-w-[480px]">
           <div className="bg-white border border-[#e8e7e3] rounded-[20px] p-7">
             {step === 1 && <StepTemplate />}
-            {step === 2 && <StepProfile />}
-            {step === 3 && <StepAbout />}
-            {step === 4 && <StepSkills />}
-            {step === 5 && <StepProjects />}
-            {step === 6 && <StepExtras />}
-            {step === 7 && <StepDesign />}
-            {step === 8 && <StepLaunch />}
+{step === 2 && <StepProfile />}
+{step === 3 && <StepAbout />}
+{step === 4 && <StepSkills />}
+{step === 5 && <StepProjects />}
+{step === 6 && <StepExtras />}
+{step === 7 && <StepIntro />}
+{step === 8 && <StepDesign />}
+{step === 9 && <StepLaunch />}
             <BuilderNav />
           </div>
         </div>
