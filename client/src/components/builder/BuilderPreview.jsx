@@ -19,44 +19,107 @@ function SkillBar({ name, proficiency, color, bg }) {
   );
 }
 
-/* ═══ FLIP CARD ═══ */
-function FlipCard({ project, colors: c, config, isFlip }) {
-  const [flipped, setFlipped] = useState(false);
-  const dk = c.bg?.startsWith("#0") || c.bg?.startsWith("#1");
-
-  if (!isFlip) {
-    return (
-      <div style={{ background: config.effects.glass ? `${c.sf}bb` : c.sf, border: `0.5px solid ${c.bd}`, borderRadius: 8, overflow: "hidden" }}>
-        {project.image && <img src={project.image} alt="" style={{ width: "100%", height: config.layout === "card" ? 50 : 70, objectFit: "cover", borderBottom: `0.5px solid ${c.bd}` }} />}
-        <div style={{ padding: "0.5rem 0.6rem" }}>
-          <div style={{ fontWeight: 600, fontSize: "0.78rem", fontFamily: config.hFont }}>{project.name}</div>
-          {project.description && <div style={{ fontSize: "0.65rem", color: c.mu, marginTop: "0.15rem" }}>{project.description}</div>}
-          {project.tags?.length > 0 && (
-            <div style={{ display: "flex", gap: 2, marginTop: 4, flexWrap: "wrap" }}>
-              {project.tags.map((t, j) => <span key={j} style={{ fontSize: "0.5rem", color: c.ac, background: `${c.ac}10`, padding: "0.1rem 0.3rem", borderRadius: 3 }}>{t}</span>)}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+/* ═══ PROJECT CARD (no flip — direct view) ═══ */
+function ProjectCard({ project, colors: c, config }) {
+  const [hovered, setHovered] = useState(false);
 
   return (
-    <div onMouseEnter={() => setFlipped(true)} onMouseLeave={() => setFlipped(false)} style={{ perspective: 400, cursor: "pointer" }}>
-      <div style={{ position: "relative", transformStyle: "preserve-3d", transition: "transform 0.6s cubic-bezier(.4,0,.2,1)", transform: flipped ? "rotateY(180deg)" : "rotateY(0)" }}>
-        <div style={{ backfaceVisibility: "hidden", background: config.effects.glass ? `${c.sf}bb` : c.sf, border: `0.5px solid ${c.bd}`, borderRadius: 8, overflow: "hidden" }}>
-          {project.image && <img src={project.image} alt="" style={{ width: "100%", height: config.layout === "card" ? 50 : 70, objectFit: "cover", borderBottom: `0.5px solid ${c.bd}` }} />}
-          <div style={{ padding: "0.5rem 0.6rem" }}>
-            <div style={{ fontWeight: 600, fontSize: "0.78rem", fontFamily: config.hFont }}>{project.name}</div>
-            {project.tags?.length > 0 && <div style={{ display: "flex", gap: 2, marginTop: 4, flexWrap: "wrap" }}>{project.tags.map((t, j) => <span key={j} style={{ fontSize: "0.5rem", color: c.ac, background: `${c.ac}10`, padding: "0.1rem 0.3rem", borderRadius: 3 }}>{t}</span>)}</div>}
-            <div style={{ fontSize: "0.45rem", color: c.mu, marginTop: 3, textAlign: "center" }}>Hover to flip</div>
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: config.effects.glass ? `${c.sf}bb` : c.sf,
+        border: `0.5px solid ${hovered ? c.ac + "60" : c.bd}`,
+        borderRadius: 10,
+        overflow: "hidden",
+        transition: "all 0.3s cubic-bezier(.4,0,.2,1)",
+        transform: hovered ? "translateY(-2px)" : "none",
+        boxShadow: hovered ? `0 8px 24px ${c.ac}10` : "none",
+      }}
+    >
+      {/* Project Image */}
+      {project.image && (
+        <div style={{ position: "relative", overflow: "hidden" }}>
+          <img
+            src={project.image} alt=""
+            style={{
+              width: "100%",
+              height: config.layout === "card" ? 60 : 80,
+              objectFit: "cover",
+              borderBottom: `0.5px solid ${c.bd}`,
+              transition: "transform 0.3s",
+              transform: hovered ? "scale(1.05)" : "scale(1)",
+            }}
+          />
+          {/* Overlay on hover with view button */}
+          {project.link && (
+            <a
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                position: "absolute", inset: 0,
+                background: `${c.ac}cc`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                opacity: hovered ? 1 : 0,
+                transition: "opacity 0.3s",
+                textDecoration: "none",
+                fontSize: "0.6rem", fontWeight: 700,
+                color: c.bg.startsWith("#0") || c.bg.startsWith("#1") ? "#0a0a0f" : "#fff",
+              }}
+            >
+              ↗ View Project
+            </a>
+          )}
+        </div>
+      )}
+
+      {/* Project Info */}
+      <div style={{ padding: "0.5rem 0.6rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ fontWeight: 600, fontSize: "0.78rem", fontFamily: config.hFont }}>{project.name}</div>
+          {project.link && (
+            <a
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontSize: "0.55rem", color: c.ac,
+                background: `${c.ac}15`,
+                padding: "0.15rem 0.45rem",
+                borderRadius: 4,
+                textDecoration: "none",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.2s",
+                border: `0.5px solid ${c.ac}30`,
+              }}
+            >
+              ↗ Live
+            </a>
+          )}
+        </div>
+
+        {project.description && (
+          <div style={{ fontSize: "0.65rem", color: c.mu, marginTop: "0.2rem", lineHeight: 1.5 }}>
+            {project.description}
           </div>
-        </div>
-        <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", background: c.ac, borderRadius: 8, padding: "0.6rem", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <div style={{ fontWeight: 700, fontSize: "0.72rem", color: dk ? "#0a0a0f" : "#fff", marginBottom: 3 }}>{project.name}</div>
-          {project.description && <div style={{ fontSize: "0.58rem", color: dk ? "#0a0a0f99" : "#ffffffcc", lineHeight: 1.4 }}>{project.description}</div>}
-          {project.link && <div style={{ fontSize: "0.5rem", marginTop: 4, color: dk ? "#0a0a0f" : "#fff", fontWeight: 600 }}>↗ View</div>}
-        </div>
+        )}
+
+        {/* Tags */}
+        {project.tags?.length > 0 && (
+          <div style={{ display: "flex", gap: 3, marginTop: 5, flexWrap: "wrap" }}>
+            {project.tags.map((t, j) => (
+              <span key={j} style={{
+                fontSize: "0.5rem", color: c.ac,
+                background: `${c.ac}10`,
+                padding: "0.12rem 0.35rem",
+                borderRadius: 3,
+                fontWeight: 500,
+              }}>{t}</span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -76,7 +139,6 @@ export default function BuilderPreview() {
   const [showHireMe, setShowHireMe] = useState(false);
   const [introKey, setIntroKey] = useState(0);
 
-  // Replay intro when config changes
   useEffect(() => {
     if (f.animatedIntro) {
       setShowIntro(true);
@@ -112,8 +174,10 @@ export default function BuilderPreview() {
   const renderProjects = () => data.projects?.some(p => p.name) ? (
     <div key="projects" style={{ padding: `${config.spacing * 0.8}rem ${config.spacing * 1.2}rem`, borderBottom: `1px solid ${tc.bd}` }}>
       <div style={sLbl}>Projects</div>
-      <div style={{ display: "grid", gap: "0.4rem", gridTemplateColumns: config.layout === "card" ? "1fr 1fr" : "1fr" }}>
-        {data.projects.filter(p => p.name).map((p, i) => <FlipCard key={i} project={p} colors={tc} config={config} isFlip={f.flipCards} />)}
+      <div style={{ display: "grid", gap: "0.5rem", gridTemplateColumns: config.layout === "card" ? "1fr 1fr" : "1fr" }}>
+        {data.projects.filter(p => p.name).map((p, i) => (
+          <ProjectCard key={i} project={p} colors={tc} config={config} />
+        ))}
       </div>
     </div>
   ) : null;
@@ -122,7 +186,10 @@ export default function BuilderPreview() {
     <div key="experience" style={{ padding: `${config.spacing * 0.8}rem ${config.spacing * 1.2}rem`, borderBottom: `1px solid ${tc.bd}` }}>
       <div style={sLbl}>Experience</div>
       {data.experience.filter(e => e.company).map((e, i) => (
-        <div key={i} style={{ marginBottom: 8 }}><div style={{ fontWeight: 600, fontSize: "0.75rem" }}>{e.role} <span style={{ color: tc.mu, fontWeight: 400 }}>at {e.company}</span></div><div style={{ fontSize: "0.58rem", color: tc.ac }}>{e.period}</div></div>
+        <div key={i} style={{ marginBottom: 8 }}>
+          <div style={{ fontWeight: 600, fontSize: "0.75rem" }}>{e.role} <span style={{ color: tc.mu, fontWeight: 400 }}>at {e.company}</span></div>
+          <div style={{ fontSize: "0.58rem", color: tc.ac }}>{e.period}</div>
+        </div>
       ))}
     </div>
   ) : null;
@@ -131,7 +198,10 @@ export default function BuilderPreview() {
     <div key="education" style={{ padding: `${config.spacing * 0.8}rem ${config.spacing * 1.2}rem`, borderBottom: `1px solid ${tc.bd}` }}>
       <div style={sLbl}>Education</div>
       {data.education.filter(e => e.school).map((e, i) => (
-        <div key={i} style={{ marginBottom: 6 }}><div style={{ fontWeight: 600, fontSize: "0.75rem" }}>{e.degree}</div><div style={{ fontSize: "0.62rem", color: tc.mu }}>{e.school} · {e.year}</div></div>
+        <div key={i} style={{ marginBottom: 6 }}>
+          <div style={{ fontWeight: 600, fontSize: "0.75rem" }}>{e.degree}</div>
+          <div style={{ fontSize: "0.62rem", color: tc.mu }}>{e.school} · {e.year}</div>
+        </div>
       ))}
     </div>
   ) : null;
@@ -152,16 +222,52 @@ export default function BuilderPreview() {
     <div key="resume" style={{ padding: `${config.spacing * 0.8}rem ${config.spacing * 1.2}rem`, borderBottom: `1px solid ${tc.bd}` }}>
       <div style={sLbl}>Resume</div>
       <div style={{ display: "flex", alignItems: "center", gap: 6, background: tc.sf, border: `0.5px solid ${tc.bd}`, borderRadius: 8, padding: "0.5rem" }}>
-        <span>📄</span><div style={{ flex: 1, fontSize: "0.72rem", fontWeight: 600 }}>{data.resumeName}</div>
-        {f.downloadResume && <span style={{ fontSize: "0.6rem", color: tc.ac, fontWeight: 600 }}>⬇ Download</span>}
+        <span>📄</span>
+        <div style={{ flex: 1, fontSize: "0.72rem", fontWeight: 600 }}>{data.resumeName}</div>
+        {f.downloadResume && (
+          <a href={data.resume} download={data.resumeName}
+            style={{ fontSize: "0.6rem", color: tc.ac, fontWeight: 600, textDecoration: "none", cursor: "pointer" }}>
+            ⬇ Download
+          </a>
+        )}
       </div>
     </div>
   ) : null;
 
-  const renderServices = () => (<div key="services" style={{ padding: `${config.spacing * 0.8}rem ${config.spacing * 1.2}rem`, borderBottom: `1px solid ${tc.bd}` }}><div style={sLbl}>Services</div><div style={{ fontSize: "0.68rem", color: tc.mu, fontStyle: "italic" }}>Your services here</div></div>);
-  const renderContact = () => (<div key="contact" style={{ padding: `${config.spacing * 0.8}rem ${config.spacing * 1.2}rem`, borderBottom: `1px solid ${tc.bd}` }}><div style={sLbl}>Contact</div><div style={{ display: "grid", gap: 4 }}><div style={{ height: 26, background: tc.sf, border: `0.5px solid ${tc.bd}`, borderRadius: 6 }} /><div style={{ height: 26, background: tc.sf, border: `0.5px solid ${tc.bd}`, borderRadius: 6 }} /><div style={{ height: 44, background: tc.sf, border: `0.5px solid ${tc.bd}`, borderRadius: 6 }} /><div style={{ height: 22, width: 70, background: tc.ac, borderRadius: 6, opacity: 0.8 }} /></div></div>);
-  const renderGallery = () => (<div key="gallery" style={{ padding: `${config.spacing * 0.8}rem ${config.spacing * 1.2}rem`, borderBottom: `1px solid ${tc.bd}` }}><div style={sLbl}>Gallery</div><div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4 }}>{[1,2,3,4,5,6].map(n => <div key={n} style={{ height: 36, background: tc.sf, border: `0.5px solid ${tc.bd}`, borderRadius: 4 }} />)}</div></div>);
-  const renderAchievements = () => (<div key="achievements" style={{ padding: `${config.spacing * 0.8}rem ${config.spacing * 1.2}rem`, borderBottom: `1px solid ${tc.bd}` }}><div style={sLbl}>Achievements</div><div style={{ fontSize: "0.68rem", color: tc.mu, fontStyle: "italic" }}>Your achievements</div></div>);
+  const renderServices = () => (
+    <div key="services" style={{ padding: `${config.spacing * 0.8}rem ${config.spacing * 1.2}rem`, borderBottom: `1px solid ${tc.bd}` }}>
+      <div style={sLbl}>Services</div>
+      <div style={{ fontSize: "0.68rem", color: tc.mu, fontStyle: "italic" }}>Your services here</div>
+    </div>
+  );
+
+  const renderContact = () => (
+    <div key="contact" style={{ padding: `${config.spacing * 0.8}rem ${config.spacing * 1.2}rem`, borderBottom: `1px solid ${tc.bd}` }}>
+      <div style={sLbl}>Contact</div>
+      <div style={{ display: "grid", gap: 4 }}>
+        <div style={{ height: 26, background: tc.sf, border: `0.5px solid ${tc.bd}`, borderRadius: 6 }} />
+        <div style={{ height: 26, background: tc.sf, border: `0.5px solid ${tc.bd}`, borderRadius: 6 }} />
+        <div style={{ height: 44, background: tc.sf, border: `0.5px solid ${tc.bd}`, borderRadius: 6 }} />
+        <div style={{ height: 22, width: 70, background: tc.ac, borderRadius: 6, opacity: 0.8 }} />
+      </div>
+    </div>
+  );
+
+  const renderGallery = () => (
+    <div key="gallery" style={{ padding: `${config.spacing * 0.8}rem ${config.spacing * 1.2}rem`, borderBottom: `1px solid ${tc.bd}` }}>
+      <div style={sLbl}>Gallery</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4 }}>
+        {[1, 2, 3, 4, 5, 6].map(n => <div key={n} style={{ height: 36, background: tc.sf, border: `0.5px solid ${tc.bd}`, borderRadius: 4 }} />)}
+      </div>
+    </div>
+  );
+
+  const renderAchievements = () => (
+    <div key="achievements" style={{ padding: `${config.spacing * 0.8}rem ${config.spacing * 1.2}rem`, borderBottom: `1px solid ${tc.bd}` }}>
+      <div style={sLbl}>Achievements</div>
+      <div style={{ fontSize: "0.68rem", color: tc.mu, fontStyle: "italic" }}>Your achievements</div>
+    </div>
+  );
 
   const sectionMap = { about: renderAbout, skills: renderSkills, projects: renderProjects, experience: renderExperience, education: renderEducation, testimonials: renderTestimonials, resume: renderResume, services: renderServices, contact: renderContact, gallery: renderGallery, achievements: renderAchievements };
 
@@ -192,7 +298,7 @@ export default function BuilderPreview() {
       <div className="border border-[#e8e7e3] rounded-2xl overflow-hidden max-h-[80vh] overflow-y-auto bg-white relative">
         <div style={{ background: tc.bg, color: tc.tx, fontFamily: config.bFont, minHeight: 300, position: "relative" }}>
 
-          {/* ═══ INTRO OVERLAY ═══ */}
+          {/* Intro Overlay */}
           {f.animatedIntro && showIntro && (
             <IntroOverlay key={introKey} data={data} config={config} onDone={() => setShowIntro(false)} />
           )}
@@ -209,7 +315,7 @@ export default function BuilderPreview() {
             {/* Theme Toggle */}
             {f.themeToggle && (
               <button onClick={() => setPreviewTheme(p => p === "default" ? "flipped" : "default")}
-                style={{ position: "absolute", top: f.coverImage ? 88 : 8, right: 10, zIndex: 10, width: 28, height: 28, borderRadius: "50%", border: `1px solid ${tc.bd}`, background: tc.sf, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem" }}>
+                style={{ position: "absolute", top: f.coverImage ? 88 : 8, right: 10, zIndex: 10, width: 28, height: 28, borderRadius: "50%", border: `1px solid ${tc.bd}`, background: tc.sf, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", transition: "all 0.2s" }}>
                 {previewTheme === "default" ? "🌙" : "☀️"}
               </button>
             )}
@@ -228,13 +334,63 @@ export default function BuilderPreview() {
                   {data.tagline && <div style={{ fontSize: "0.6rem", color: tc.ac, marginTop: 2, fontStyle: "italic" }}>{data.tagline}</div>}
                 </div>
               </div>
+
+              {/* Contact info */}
               <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", fontSize: "0.6rem", color: tc.mu }}>
-                {data.email && <span>📧 {data.email}</span>}
-                {data.phone && <span>📱 {data.phone}</span>}
+                {data.email && <a href={`mailto:${data.email}`} style={{ color: tc.mu, textDecoration: "none" }}>📧 {data.email}</a>}
+                {data.phone && <a href={`tel:${data.phone}`} style={{ color: tc.mu, textDecoration: "none" }}>📱 {data.phone}</a>}
                 {data.location && <span>📍 {data.location}</span>}
               </div>
-              {data.socials?.some(s => s.url) && <div style={{ display: "flex", gap: 4, marginTop: 6, flexWrap: "wrap" }}>{data.socials.filter(s => s.url).map((s, i) => <span key={i} style={{ fontSize: "0.52rem", background: dk ? tc.sf : tc.bd, border: `0.5px solid ${tc.bd}`, padding: "0.15rem 0.4rem", borderRadius: 4, color: tc.ac }}>{s.icon} {s.label}</span>)}</div>}
-              {f.downloadResume && data.resume && <div style={{ marginTop: 8 }}><span style={{ fontSize: "0.58rem", color: tc.ac, background: `${tc.ac}10`, border: `1px solid ${tc.ac}20`, padding: "0.25rem 0.6rem", borderRadius: 6, fontWeight: 600, cursor: "pointer" }}>📥 Download Resume</span></div>}
+
+              {/* Social links — CLICKABLE */}
+              {data.socials?.some(s => s.url) && (
+                <div style={{ display: "flex", gap: 4, marginTop: 6, flexWrap: "wrap" }}>
+                  {data.socials.filter(s => s.url).map((s, i) => (
+                    <a
+                      key={i}
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontSize: "0.52rem",
+                        background: dk ? tc.sf : tc.bd,
+                        border: `0.5px solid ${tc.bd}`,
+                        padding: "0.15rem 0.4rem",
+                        borderRadius: 4,
+                        color: tc.ac,
+                        textDecoration: "none",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.opacity = "0.7"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "none"; }}
+                    >
+                      {s.icon} {s.label}
+                    </a>
+                  ))}
+                </div>
+              )}
+
+              {/* Download Resume — CLICKABLE */}
+              {f.downloadResume && data.resume && (
+                <div style={{ marginTop: 8 }}>
+                  <a
+                    href={data.resume}
+                    download={data.resumeName}
+                    style={{
+                      fontSize: "0.58rem", color: tc.ac,
+                      background: `${tc.ac}10`, border: `1px solid ${tc.ac}20`,
+                      padding: "0.25rem 0.6rem", borderRadius: 6,
+                      fontWeight: 600, cursor: "pointer", textDecoration: "none",
+                      transition: "all 0.2s",
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.opacity = "0.7"}
+                    onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                  >
+                    📥 Download Resume
+                  </a>
+                </div>
+              )}
             </div>
 
             {/* Dynamic Sections */}
@@ -249,7 +405,7 @@ export default function BuilderPreview() {
           {/* Hire Me Button */}
           {f.hireMeButton && (
             <>
-              <button onClick={() => setShowHireMe(!showHireMe)} style={{ position: "absolute", bottom: 12, right: 12, zIndex: 20, background: tc.ac, color: dk ? "#0a0a0f" : "#fff", border: "none", borderRadius: 100, padding: "0.35rem 0.8rem", fontSize: "0.6rem", fontWeight: 700, cursor: "pointer", boxShadow: `0 4px 16px ${tc.ac}40` }}>
+              <button onClick={() => setShowHireMe(!showHireMe)} style={{ position: "absolute", bottom: 12, right: 12, zIndex: 20, background: tc.ac, color: dk ? "#0a0a0f" : "#fff", border: "none", borderRadius: 100, padding: "0.35rem 0.8rem", fontSize: "0.6rem", fontWeight: 700, cursor: "pointer", boxShadow: `0 4px 16px ${tc.ac}40`, transition: "all 0.3s" }}>
                 {showHireMe ? "✕ Close" : "💼 Hire Me"}
               </button>
               {showHireMe && (

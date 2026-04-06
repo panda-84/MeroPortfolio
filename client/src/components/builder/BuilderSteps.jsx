@@ -7,6 +7,7 @@ const STEPS = [
   { icon: "⚡", label: "Skills" },
   { icon: "💼", label: "Projects" },
   { icon: "🔗", label: "Extras" },
+  { icon: "🎬", label: "Intro" },
   { icon: "✨", label: "Design" },
   { icon: "🚀", label: "Launch" },
 ];

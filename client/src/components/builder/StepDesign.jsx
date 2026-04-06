@@ -1,190 +1,154 @@
-import { createContext, useContext, useState } from "react";
+import { useState } from "react";
+import { useBuilder, PALETTES, SECTIONS_LIST, FONTS_H, LAYOUTS, INTROS, AVATAR_SHAPES } from "../../context/BuilderContext";
+import SectionManager from "./SectionManager";
 
-export const PALETTES = [
-  { name: "Mint Night", bg: "#0a0a0f", sf: "#12121e", ac: "#5cff6b", tx: "#e4e4ed", mu: "#6b6b80", bd: "#1e1e30" },
-  { name: "Ocean", bg: "#080d14", sf: "#0f1824", ac: "#38bdf8", tx: "#e0eaf4", mu: "#6b8299", bd: "#1a2a3d" },
-  { name: "Coral", bg: "#0f0a0a", sf: "#1e1214", ac: "#fb7185", tx: "#f0e4e4", mu: "#99706b", bd: "#2e1a1a" },
-  { name: "Lavender", bg: "#0d0a14", sf: "#16121e", ac: "#a78bfa", tx: "#e8e4f4", mu: "#7b6b99", bd: "#231e3d" },
-  { name: "Gold", bg: "#0f0d08", sf: "#1e1b12", ac: "#fbbf24", tx: "#f0ede4", mu: "#998a6b", bd: "#2e2a1a" },
-  { name: "Rose", bg: "#100c0c", sf: "#1e1418", ac: "#f472b6", tx: "#f0e8ec", mu: "#99707e", bd: "#2e1a24" },
-  { name: "Clean White", bg: "#fafaf8", sf: "#ffffff", ac: "#141413", tx: "#141413", mu: "#777", bd: "#e8e7e3" },
-  { name: "Warm Paper", bg: "#faf6f0", sf: "#fff8f0", ac: "#c45c3a", tx: "#2a1f18", mu: "#8a7a6a", bd: "#e8dcd0" },
-  { name: "Forest", bg: "#0a0f0c", sf: "#121e18", ac: "#34d399", tx: "#d8f0e4", mu: "#6b9980", bd: "#1a3028" },
-  { name: "Arctic", bg: "#f0f4f8", sf: "#ffffff", ac: "#0369a1", tx: "#0c2a4a", mu: "#6889a8", bd: "#d0dce8" },
-  { name: "Sunset", bg: "#1a0f08", sf: "#2a1a10", ac: "#f97316", tx: "#fde8d0", mu: "#b08860", bd: "#3a2a18" },
-  { name: "Cherry", bg: "#0f0508", sf: "#1e0a10", ac: "#e11d48", tx: "#f8e0e8", mu: "#a06070", bd: "#2e1020" },
-];
-
-export const SECTIONS_LIST = [
-  { id: "about", name: "About", icon: "💬" },
-  { id: "skills", name: "Skills", icon: "⚡" },
-  { id: "projects", name: "Projects", icon: "💼" },
-  { id: "experience", name: "Experience", icon: "🏢" },
-  { id: "education", name: "Education", icon: "🎓" },
-  { id: "testimonials", name: "Testimonials", icon: "⭐" },
-  { id: "services", name: "Services", icon: "🛠" },
-  { id: "contact", name: "Contact Form", icon: "📬" },
-  { id: "resume", name: "Resume/CV", icon: "📄" },
-  { id: "gallery", name: "Photo Gallery", icon: "🖼" },
-  { id: "achievements", name: "Achievements", icon: "🏆" },
-];
-
-export const FONTS_H = [
-  { n: "Jakarta", v: "'Plus Jakarta Sans',sans-serif" },
-  { n: "Grotesk", v: "'Space Grotesk',sans-serif" },
-  { n: "Playfair", v: "'Playfair Display',serif" },
-  { n: "JetBrains", v: "'JetBrains Mono',monospace" },
-  { n: "Cormorant", v: "'Cormorant Garamond',serif" },
-];
-
-export const LAYOUTS = [
-  { id: "classic", n: "Classic", icon: "▤", d: "Top-down" },
-  { id: "split", n: "Split", icon: "◫", d: "Sidebar" },
-  { id: "card", n: "Cards", icon: "▦", d: "Grid" },
-  { id: "minimal", n: "Minimal", icon: "▬", d: "Text" },
-];
-
-export const INTROS = [
-  { id: "none", n: "None" }, { id: "fade", n: "Fade Up" },
-  { id: "typewriter", n: "Typewriter" }, { id: "split", n: "Split Reveal" },
-  { id: "glitch", n: "Glitch" }, { id: "blur", n: "Blur Focus" },
-];
-
-export const AVATAR_SHAPES = [
-  { id: "rounded", n: "Rounded", r: 14 }, { id: "circle", n: "Circle", r: "50%" },
-  { id: "square", n: "Square", r: 4 }, { id: "none", n: "None", r: null },
-];
-
-const BuilderContext = createContext(null);
-
-export function BuilderProvider({ children }) {
-  const [step, setStep] = useState(1);
-
-  const [data, setData] = useState({
-    name: "", title: "", tagline: "", email: "", phone: "", location: "",
-    photo: null, coverImage: null, about: "",
-    // Skills now have proficiency
-    skills: [],
-    projects: [{ name: "", description: "", link: "", image: null, tags: [] }],
-    socials: [
-      { icon: "🐙", label: "GitHub", url: "" }, { icon: "💼", label: "LinkedIn", url: "" },
-      { icon: "🐦", label: "Twitter", url: "" }, { icon: "🌐", label: "Website", url: "" },
-      { icon: "📸", label: "Instagram", url: "" }, { icon: "🎵", label: "TikTok", url: "" },
-    ],
-    experience: [{ role: "", company: "", period: "" }],
-    education: [{ degree: "", school: "", year: "" }],
-    testimonials: [{ text: "", author: "", role: "" }],
-    resume: null, resumeName: "",
-    // Contact info for Hire Me
-    contactMessage: "",
-  });
-
-  const [config, setConfig] = useState({
-    palette: PALETTES[0], hFont: FONTS_H[0].v, bFont: "'DM Sans',sans-serif",
-    layout: "classic", intro: "fade", avatarShape: "rounded", spacing: 1.2,
-    effects: { grain: true, glow: true, animate: true, glass: false },
-    sections: ["about", "skills", "projects"],
-    // ═══ NEW FEATURE TOGGLES ═══
-    features: {
-      skillBars: true,        // Animated proficiency bars
-      coverImage: false,       // Hero banner
-      availableBadge: true,    // Green "Available" dot
-      themeToggle: true,       // Dark/light switch for visitors
-      hireMeButton: true,      // Floating hire me button
-      flipCards: true,         // Project cards flip on hover
-      animatedIntro: true,     // Name animation on load
-      downloadResume: true,    // Resume download button
-    },
-  });
-
-  // ═══ DATA HELPERS ═══
-  const updateData = (k, v) => setData(d => ({ ...d, [k]: v }));
-
-  // Projects
-  const updateProject = (i, k, v) => setData(d => ({ ...d, projects: d.projects.map((p, idx) => idx === i ? { ...p, [k]: v } : p) }));
-  const addProject = () => data.projects.length < 6 && setData(d => ({ ...d, projects: [...d.projects, { name: "", description: "", link: "", image: null, tags: [] }] }));
-  const removeProject = (i) => data.projects.length > 1 && setData(d => ({ ...d, projects: d.projects.filter((_, idx) => idx !== i) }));
-
-  // Skills with proficiency
-  const addSkill = (name, proficiency = 80) => {
-    if (name.trim() && data.skills.length < 20 && !data.skills.find(s => s.name === name.trim())) {
-      setData(d => ({ ...d, skills: [...d.skills, { name: name.trim(), proficiency }] }));
-    }
-  };
-  const removeSkill = (i) => setData(d => ({ ...d, skills: d.skills.filter((_, idx) => idx !== i) }));
-  const updateSkillProficiency = (i, proficiency) => {
-    setData(d => ({ ...d, skills: d.skills.map((s, idx) => idx === i ? { ...s, proficiency } : s) }));
-  };
-
-  // Socials
-  const updateSocial = (index, url) => {
-    setData(d => ({ ...d, socials: d.socials.map((s, i) => i === index ? { ...s, url } : s) }));
-  };
-
-  // Experience
-  const updateExperience = (index, key, value) => {
-    setData(d => ({ ...d, experience: d.experience.map((e, i) => i === index ? { ...e, [key]: value } : e) }));
-  };
-  const addExperience = () => {
-    setData(d => ({ ...d, experience: [...d.experience, { role: "", company: "", period: "" }] }));
-  };
-
-  // Education
-  const updateEducation = (index, key, value) => {
-    setData(d => ({ ...d, education: d.education.map((e, i) => i === index ? { ...e, [key]: value } : e) }));
-  };
-  const addEducation = () => {
-    setData(d => ({ ...d, education: [...d.education, { degree: "", school: "", year: "" }] }));
-  };
-
-  // Testimonials
-  const updateTestimonial = (index, key, value) => {
-    setData(d => ({ ...d, testimonials: d.testimonials.map((t, i) => i === index ? { ...t, [key]: value } : t) }));
-  };
-  const addTestimonial = () => {
-    setData(d => ({ ...d, testimonials: [...d.testimonials, { text: "", author: "", role: "" }] }));
-  };
-
-  // ═══ CONFIG HELPERS ═══
-  const updateConfig = (k, v) => setConfig(c => ({ ...c, [k]: v }));
-  const toggleEffect = (k) => setConfig(c => ({ ...c, effects: { ...c.effects, [k]: !c.effects[k] } }));
-  const toggleSection = (id) => setConfig(c => ({ ...c, sections: c.sections.includes(id) ? c.sections.filter(s => s !== id) : [...c.sections, id] }));
-  const toggleFeature = (k) => setConfig(c => ({ ...c, features: { ...c.features, [k]: !c.features[k] } }));
-
-  // ═══ NAVIGATION ═══
-  const goNext = () => setStep(s => Math.min(8, s + 1));
-  const goBack = () => setStep(s => Math.max(1, s - 1));
-  const goTo = (s) => setStep(s);
-
-  // ═══ COMPLETENESS ═══
-  const completeness = (() => {
-    let s = 0;
-    if (data.name) s++; if (data.title) s++; if (data.about) s++;
-    if (data.skills.length) s++; if (data.projects.some(p => p.name)) s++; if (data.photo) s++;
-    return Math.round((s / 6) * 100);
-  })();
-
+function Panel({ title, icon, children, open: dflt = true }) {
+  const [open, setOpen] = useState(dflt);
   return (
-    <BuilderContext.Provider value={{
-      step, setStep, goNext, goBack, goTo,
-      data, setData, updateData,
-      updateProject, addProject, removeProject,
-      addSkill, removeSkill, updateSkillProficiency,
-      updateSocial,
-      updateExperience, addExperience,
-      updateEducation, addEducation,
-      updateTestimonial, addTestimonial,
-      config, setConfig, updateConfig,
-      toggleEffect, toggleSection, toggleFeature,
-      completeness,
-    }}>
-      {children}
-    </BuilderContext.Provider>
+    <div className="mb-1.5 rounded-xl overflow-hidden border border-[#e8e7e3]">
+      <button onClick={() => setOpen(!open)} className="w-full flex items-center gap-1.5 px-3 py-2.5 bg-white border-none cursor-pointer">
+        <span className="text-[0.85rem]">{icon}</span>
+        <span className="font-bold text-[0.82rem] flex-1 text-left text-[#141413]">{title}</span>
+        <span className={`text-[#22c55e] text-[0.7rem] transition-transform duration-300 ${open ? "rotate-180" : ""}`}>▾</span>
+      </button>
+      <div className={`overflow-hidden transition-all duration-400 bg-[#fafaf8] ${open ? "max-h-[2000px]" : "max-h-0"}`}>
+        <div className="p-3">{children}</div>
+      </div>
+    </div>
   );
 }
 
-export function useBuilder() {
-  const ctx = useContext(BuilderContext);
-  if (!ctx) throw new Error("useBuilder must be inside BuilderProvider");
-  return ctx;
+function Toggle({ on, onChange }) {
+  return (
+    <div onClick={onChange} className="w-8 h-[18px] rounded-full p-[2px] cursor-pointer flex-shrink-0 transition-colors duration-200"
+      style={{ background: on ? "#22c55e" : "#d4d4c8" }}>
+      <div className="w-[14px] h-[14px] rounded-full bg-white shadow-sm transition-transform duration-200"
+        style={{ transform: on ? "translateX(14px)" : "translateX(0)" }} />
+    </div>
+  );
+}
+
+export default function StepDesign() {
+  const { config, updateConfig, toggleEffect, toggleFeature } = useBuilder();
+
+  return (
+    <div>
+      <h2 className="text-xl font-extrabold mb-0.5">Customize design</h2>
+      <p className="text-[#5a5a55] text-[0.82rem] mb-5">Make it uniquely yours</p>
+
+      <Panel title="Portfolio Features" icon="🔥">
+        <div className="grid gap-1">
+          {[
+            { k: "animatedIntro", n: "Animated Intro", d: "Name animates on load", icon: "🎬" },
+            { k: "availableBadge", n: "Available Badge", d: "Show available status", icon: "🟢" },
+            { k: "skillBars", n: "Skill Bars", d: "Animated progress bars", icon: "📊" },
+            { k: "coverImage", n: "Cover Image", d: "Banner at top", icon: "🖼" },
+            { k: "flipCards", n: "Flip Cards", d: "Projects flip on hover", icon: "🃏" },
+            { k: "hireMeButton", n: "Hire Me Button", d: "Floating contact button", icon: "💼" },
+            { k: "themeToggle", n: "Theme Toggle", d: "Dark/light switch", icon: "🌓" },
+            { k: "downloadResume", n: "Download Resume", d: "CV download button", icon: "📥" },
+          ].map(f => (
+            <div key={f.k} className="flex items-center justify-between py-2 px-2 rounded-lg hover:bg-[#f3f2ee] transition-colors">
+              <div className="flex items-center gap-2">
+                <span className="text-[0.9rem]">{f.icon}</span>
+                <div>
+                  <div className="text-[0.78rem] font-semibold">{f.n}</div>
+                  <div className="text-[0.6rem] text-[#9a9a92]">{f.d}</div>
+                </div>
+              </div>
+              <Toggle on={config.features[f.k]} onChange={() => toggleFeature(f.k)} />
+            </div>
+          ))}
+        </div>
+      </Panel>
+
+      <Panel title="Colors" icon="🎨">
+        <div className="grid grid-cols-6 gap-1.5 mb-2">
+          {PALETTES.map((p, i) => (
+            <div key={i} onClick={() => updateConfig("palette", p)} title={p.name}
+              className={`h-8 rounded-lg cursor-pointer transition-all duration-200 border-2 ${config.palette.name === p.name ? "border-[#22c55e]" : "border-[#e8e7e3]"}`}
+              style={{ background: `linear-gradient(135deg, ${p.bg} 50%, ${p.ac} 50%)` }} />
+          ))}
+        </div>
+        <div className="flex items-center gap-2 mt-2">
+          <span className="text-[0.62rem] text-[#9a9a92]">Custom:</span>
+          <input type="color" value={config.palette.ac} onChange={e => updateConfig("palette", { ...config.palette, ac: e.target.value })} className="w-6 h-5 border-none cursor-pointer" />
+        </div>
+      </Panel>
+
+      <Panel title="Layout" icon="📐">
+        <div className="grid grid-cols-4 gap-1.5">
+          {LAYOUTS.map(l => (
+            <div key={l.id} onClick={() => updateConfig("layout", l.id)}
+              className={`text-center py-2 rounded-lg cursor-pointer border-[1.5px] ${config.layout === l.id ? "border-[#22c55e] bg-[rgba(34,197,94,0.04)]" : "border-[#e8e7e3]"}`}>
+              <div className={`text-xl ${config.layout === l.id ? "opacity-100" : "opacity-30"}`}>{l.icon}</div>
+              <div className={`text-[0.62rem] font-semibold ${config.layout === l.id ? "text-[#22c55e]" : "text-[#5a5a55]"}`}>{l.n}</div>
+            </div>
+          ))}
+        </div>
+      </Panel>
+
+      <Panel title="Heading Font" icon="✏️" open={false}>
+        <div className="grid gap-1">
+          {FONTS_H.map(f => (
+            <div key={f.n} onClick={() => updateConfig("hFont", f.v)}
+              className={`flex justify-between items-center px-2.5 py-2 rounded-lg cursor-pointer border ${config.hFont === f.v ? "border-[#22c55e]" : "border-[#e8e7e3]"}`}>
+              <span style={{ fontFamily: f.v }} className="font-bold text-[0.85rem]">{f.n}</span>
+              {config.hFont === f.v && <span className="text-[#22c55e] text-[0.65rem]">✓</span>}
+            </div>
+          ))}
+        </div>
+      </Panel>
+
+      <Panel title="Intro Animation" icon="🎬" open={false}>
+        <div className="grid grid-cols-3 gap-1.5">
+          {INTROS.map(a => (
+            <div key={a.id} onClick={() => updateConfig("intro", a.id)}
+              className={`text-center py-2 rounded-lg cursor-pointer border-[1.5px] text-[0.7rem] font-semibold ${config.intro === a.id ? "border-[#22c55e] text-[#22c55e]" : "border-[#e8e7e3] text-[#5a5a55]"}`}>{a.n}</div>
+          ))}
+        </div>
+      </Panel>
+
+      <Panel title="Avatar Style" icon="👤" open={false}>
+        <div className="flex gap-2">
+          {AVATAR_SHAPES.map(a => (
+            <div key={a.id} onClick={() => updateConfig("avatarShape", a.id)}
+              className={`flex-1 text-center py-2 rounded-lg cursor-pointer border-[1.5px] ${config.avatarShape === a.id ? "border-[#22c55e]" : "border-[#e8e7e3]"}`}>
+              <div className={`text-[0.62rem] font-semibold ${config.avatarShape === a.id ? "text-[#22c55e]" : "text-[#5a5a55]"}`}>{a.n}</div>
+            </div>
+          ))}
+        </div>
+      </Panel>
+
+      <Panel title="Effects" icon="✨" open={false}>
+        {[
+          { k: "grain", n: "Grain Texture", d: "Subtle noise" },
+          { k: "glow", n: "Ambient Glow", d: "Color glow" },
+          { k: "animate", n: "Animations", d: "Scroll effects" },
+          { k: "glass", n: "Glass Effect", d: "Frosted cards" },
+        ].map(e => (
+          <div key={e.k} className="flex items-center justify-between py-1.5">
+            <div>
+              <div className="text-[0.78rem] font-semibold">{e.n}</div>
+              <div className="text-[0.6rem] text-[#9a9a92]">{e.d}</div>
+            </div>
+            <Toggle on={config.effects[e.k]} onChange={() => toggleEffect(e.k)} />
+          </div>
+        ))}
+      </Panel>
+
+      <Panel title="Arrange Sections" icon="📋" open={false}>
+        <SectionManager />
+      </Panel>
+
+      <Panel title="Spacing" icon="📏" open={false}>
+        <input type="range" min="0.8" max="2" step="0.1" value={config.spacing} onChange={e => updateConfig("spacing", +e.target.value)} className="w-full accent-[#22c55e]" />
+        <div className="flex justify-between text-[0.62rem] text-[#9a9a92]">
+          <span>Compact</span>
+          <span className="text-[#22c55e] font-semibold">{config.spacing}x</span>
+          <span>Spacious</span>
+        </div>
+      </Panel>
+    </div>
+  );
 }
